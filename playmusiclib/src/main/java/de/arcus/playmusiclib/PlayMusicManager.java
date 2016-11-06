@@ -56,6 +56,7 @@ import de.arcus.framework.logger.Logger;
 import de.arcus.framework.superuser.SuperUser;
 import de.arcus.framework.superuser.SuperUserTools;
 import de.arcus.framework.utils.FileTools;
+import de.arcus.framework.utils.MediaScanner;
 import de.arcus.playmusiclib.enums.ID3v2Version;
 import de.arcus.playmusiclib.exceptions.CouldNotOpenDatabaseException;
 import de.arcus.playmusiclib.exceptions.NoSuperUserException;
@@ -147,7 +148,7 @@ public class PlayMusicManager {
         // Marshmallow hack
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Use the internal storage instead
-            String path = Environment.getExternalStorageDirectory() + "/PlayMusicExporter/";
+            String path = "/storage/emulated/0/PlayMusicExporter/";
             FileTools.directoryCreate(path);
             return path;
         } else {
@@ -443,8 +444,8 @@ public class PlayMusicManager {
         String path;
 
         // Fix the path for Play Music 5.9.1854
-        if (!artworkPath.startsWith("artwork2/folder/"))
-            artworkPath = "artwork2/folder/" + artworkPath;
+        if (!artworkPath.startsWith("artwork/"))
+            artworkPath = "artwork/" + artworkPath;
 
         // Search in the public data
         for (String publicData : mPathPublicData) {
@@ -496,15 +497,19 @@ public class PlayMusicManager {
         // Could not find the source file
         if (srcFile == null) return false;
 
-        String fileTmp = getTempPath() + "/tmp.mp3";
+        //Markus
+        long timeNow = System.currentTimeMillis();
+
+        String fileTmp = getTempPath() + "tmp"+ timeNow+ ".mp3";
 
         // Copy to temp path failed
         if (!SuperUserTools.fileCopy(srcFile, fileTmp))
-            return false;
+            SuperUserTools.fileCopy(srcFile, fileTmp);
+            //return false;
 
         // Encrypt the file
         if (musicTrack.isEncoded()) {
-            String fileTmpCrypt = getTempPath() + "/crypt.mp3";
+            String fileTmpCrypt = getTempPath() + "crypt.mp3";
 
             // Encrypts the file
             if (trackEncrypt(musicTrack, fileTmp, fileTmpCrypt)) {
@@ -530,7 +535,7 @@ public class PlayMusicManager {
             FileTools.directoryCreate(parentDirectory);
         } else {
             // Complex uri (Lollipop)
-            dest = getTempPath() + "/final.mp3";
+            dest = getTempPath() + "final.mp3";
 
             // The root
             DocumentFile document = DocumentFile.fromTreeUri(mContext, uri);
@@ -641,7 +646,7 @@ public class PlayMusicManager {
         cleanUp();
 
         // Adds the file to the media system
-        //new MediaScanner(mContext, dest);
+        new MediaScanner(mContext, dest);
 
         // Done
         return true;
@@ -793,8 +798,8 @@ public class PlayMusicManager {
      * Deletes all cache files
      */
     private void cleanUp() {
-        FileTools.fileDelete(getTempPath() + "/final.mp3");
-        FileTools.fileDelete(getTempPath() + "/tmp.mp3");
-        FileTools.fileDelete(getTempPath() + "/crypt.mp3");
+        FileTools.fileDelete(getTempPath() + "final.mp3");
+        FileTools.fileDelete(getTempPath() + "tmp.mp3");
+        FileTools.fileDelete(getTempPath() + "crypt.mp3");
     }
 }

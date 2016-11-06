@@ -40,7 +40,7 @@ public class SuperUserTools {
     public static boolean fileCopy(String src, String dest) {
         SuperUserCommand superUserCommand = new SuperUserCommand(new String[] {
                 "rm -f '" + dest + "'", // Remove destination file
-                "cat '" + src + "' >> '" + dest + "'", // Using cat to copy file instead of cp, because you can use it without busybox
+                "cat '" + src + "' > '" + dest + "'", // Using cat to copy file instead of cp, because you can use it without busybox
                 "chmod 0777 '" + dest + "'", // Change the access mode to all users (chown sdcard_r will fail on some devices)
                 "echo 'done'" // Fix to prevent the 'no output' bug in SuperUserCommand
         });
